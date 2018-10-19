@@ -54,6 +54,7 @@ file_info = (
 					0.1 ---> 0.01 ---> 0.001
 					accuracy ----> 10% ~ 28%
 				
+
 				5. Dropout
 					keep_prob
 
@@ -65,6 +66,7 @@ file_info = (
 
 				8. Batch normalization
 					
+
 		v1.0.2.1017_alpha Update
 				1. Upgrade code structure
 				2. Update code of mnist part 
@@ -99,6 +101,7 @@ import sys
 keep_prob = tf.placeholder("float")
 learning_rate = 0.001
 learning_rate_init = 0.01
+
 is_training = 1
 
 
@@ -108,6 +111,7 @@ saver       = []
 optimizer_1 = []
 loss        = []
 predict     = []
+
 
 
 #hyperparameter for MNIST
@@ -131,6 +135,8 @@ mnist_biases = {
 		'bd2': tf.Variable(tf.random_normal([4096])),
 		'out': tf.Variable(tf.random_normal([10]))
 }
+
+
 
 
 
@@ -165,6 +171,7 @@ cifar10_weights = {
 		'wc4': tf.Variable(tf.random_normal([3, 3, 384, 384])),
 		'wc5': tf.Variable(tf.random_normal([3, 3, 384, 256])),
 		'wd1': tf.Variable(tf.random_normal([4*4*256, 4096])),
+
 		'wd2': tf.Variable(tf.random_normal([4096, 4096])),
 		'out': tf.Variable(tf.random_normal([4096, 10]))
 }
@@ -178,7 +185,6 @@ cifar10_biases = {
 		'bd2': tf.Variable(tf.random_normal([4096])),
 		'out': tf.Variable(tf.random_normal([10]))
 }
-
 
 
 #hyperparameter for Cifar10
@@ -204,10 +210,30 @@ cifar10_biases = {
 		'out': tf.Variable(tf.random_normal([10]))
 }
 
+
+
+cifar10_weights = {
+		'wc1': tf.Variable(tf.random_normal([11, 11, 3, 64])),
+		'wc2': tf.Variable(tf.random_normal([5, 5, 64, 192])),
+		'wc3': tf.Variable(tf.random_normal([3, 3, 192, 384])),
+		'wc4': tf.Variable(tf.random_normal([3, 3, 384, 384])),
+		'wc5': tf.Variable(tf.random_normal([3, 3, 384, 256])),
+		'wd1': tf.Variable(tf.random_normal([4*4*256, 4096])),
+		#'wd1': tf.Variable(tf.random_normal([6*6*256, 4096])),
+		'wd2': tf.Variable(tf.random_normal([4096, 4096])),
+		'out': tf.Variable(tf.random_normal([4096, 10]))
+}
+cifar10_biases = {
+		'bc1': tf.Variable(tf.random_normal([64])),
+		'bc2': tf.Variable(tf.random_normal([192])),
+		'bc3': tf.Variable(tf.random_normal([384])),
+		'bc4': tf.Variable(tf.random_normal([384])),
+		'bc5': tf.Variable(tf.random_normal([256])),
+		'bd1': tf.Variable(tf.random_normal([4096])),
+		'bd2': tf.Variable(tf.random_normal([4096])),
+		'out': tf.Variable(tf.random_normal([10]))
+}
 '''
-
-
-
 
 #-------------data set import-----------------#
 
@@ -247,6 +273,7 @@ def batch_next(train_data, train_label, batch_size_1):
 		batch_data  = []
 		batch_label = []
 		for j in range(0,batch_size_1):
+
 			train_label = list(train_label)
 
 
@@ -381,6 +408,7 @@ mnist_y     = tf.placeholder("float", shape = [None, 10])
 # 从mnist import input_data
 
 #cifar10     = load_CIFAR_batch('./../data/cifar-10-batches-py/data_batch_1')
+
 cifar10      = load_CIFAR10('./../data/cifar-10-batches-py')
 cifar10_test = load_CIFAR_batch('./../data/cifar-10-batches-py/test_batch')
 
@@ -398,6 +426,7 @@ print('cifar10[1][1] is ' + str(cifar10[1][1]))
 print('cifar10[1][2] is ' + str(cifar10[1][2]))
 
 #-------------function init-----------------#
+
 
 
 #==================================change hyperparameter
@@ -485,10 +514,9 @@ def working_flow_mnist():
 		#h_conv1 = tf.nn.relu(conv2d_p(x_image, W_conv1 ,  4) + b_conv1)
 		#h_conv1 = tf.nn.relu(conv2d_p(x_image, weights['wc1'] ,  4) + biases['bc1'])
 		#h_conv1  = tf.nn.relu(conv2d_1(x_image, weights['wc1']) + biases['bc1'])
-
-		
-		#=============================batch normalization
 		h_conv1  = conv2d_1(x_image, mnist_weights['wc1']) + mnist_biases['bc1']
+	
+		#=============================batch normalization
 		bn_conv1 = tf.layers.batch_normalization(h_conv1, training=is_training, name='bn1')
 		bn_conv1 = tf.nn.relu(bn_conv1)
 		
@@ -590,6 +618,7 @@ def working_flow_mnist():
 		W_fc1 = weight_variable([4*4*256 , 4096])
 		b_fc1 = bias_variable([4096])
 		#h_conv6 = tf.reshape(h_norm5 , [-1, 4*4*256])
+
 		h_conv6 = tf.reshape(h_norm5, [-1, mnist_weights['wd1'].get_shape().as_list()[0]])
 		
 
@@ -661,7 +690,6 @@ def working_flow_mnist():
 		print('\n+++++++++++ saver is: ' + str(saver) + '\n')
 
 		return(h_fc3)
-
 
 
 def working_flow_cifar10():
@@ -836,7 +864,6 @@ def working_flow_cifar10():
 
 		saver = tf.train.Saver()
 		#print('\n+++++++++++ saver is: ' + str(saver) + '\n')
-		
 		return(h_fc3)
 
 
@@ -1080,6 +1107,7 @@ def cnn_train_cifar10():
 								#print('Using time 2 :' + str(end_2 - begin_2) + '\n')
 
 
+
 								#print ("Iter " + str((i+1)*batch_size) + ", Minibatch Loss = " + "{:.6f}".format(loss_1) + ", Training Accuracy = " + "{:.5f}".format(train_accuracy) + ', Learning_rate is:  ' + str(learning_rate))
 								print ("Iter " + str((i+1)*batch_size) + ", Minibatch Loss = " + str(loss_1) + ", Training Accuracy = " + "{:.5f}".format(train_accuracy) + ', Learning_rate is:  ' + str(learning_rate))
 
@@ -1185,6 +1213,7 @@ def predict_cifar10():
 		sess.run(tf.global_variables_initializer())
 		saver = tf.train.Saver(tf.global_variables())
 		saver.restore(sess, './../model/model_alexnet_cifar10.ckpt')
+
 
 		#mnist 的test batch
 		test_batch    = batch_next(cifar10_test[0], cifar10_test[1] , batch_size)

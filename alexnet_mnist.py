@@ -52,7 +52,6 @@ loss = []
 
 
 
-
 mnist_weights = {
 		'wc1': tf.Variable(tf.random_normal([11, 11, 1, 64])),
 		'wc2': tf.Variable(tf.random_normal([5, 5, 64, 192])),
@@ -253,6 +252,7 @@ def working_flow_mnist():
 		W_fc1 = weight_variable([4*4*256 , 4096])
 		b_fc1 = bias_variable([4096])
 		#h_conv6 = tf.reshape(h_norm5 , [-1, 4*4*256])
+
 		h_conv6 = tf.reshape(h_norm5, [-1, mnist_weights['wd1'].get_shape().as_list()[0]])
 		
 
