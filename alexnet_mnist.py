@@ -254,7 +254,6 @@ def working_flow_mnist():
 		#h_conv6 = tf.reshape(h_norm5 , [-1, 4*4*256])
 
 		h_conv6 = tf.reshape(h_norm5, [-1, mnist_weights['wd1'].get_shape().as_list()[0]])
-		
 
 		#print('\n*******h_conv5 is: ' + str(h_conv5))
 		#print('\n*******h_conv5 type is: ' + str(type(h_conv5)))
@@ -326,8 +325,6 @@ def working_flow_mnist():
 		return(h_fc3)
 
 #-----------training start -----------#
-
-
 def cnn_train_mnist():
 	with tf.Session(config=tf.ConfigProto(
 					device_count={"CPU":3},
@@ -339,7 +336,6 @@ def cnn_train_mnist():
 		indice = range(0, 5000 ,10)
 		sess = tf.InteractiveSession()
 		sess.run(tf.global_variables_initializer())
-		
 		
 		print('mnist.test.images length is: ' + str(len(mnist.test.images)))
 		

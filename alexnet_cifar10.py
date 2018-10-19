@@ -45,16 +45,13 @@ file_info = (
 				1. Bug fix and running no error
 				2. Origin
 					accuracy ----> 10% ~ 20%
-				
+
 				3. Remove LRN
 					loss drop very low (learning_rate ----> 0.001)
 					Iter 2944, Minibatch Loss = 85672786395136.000000, Training Accuracy = 0.15625
-				
 				4. Dynamic update learning_rate
 					0.1 ---> 0.01 ---> 0.001
 					accuracy ----> 10% ~ 28%
-				
-
 				5. Dropout
 					keep_prob
 
@@ -171,7 +168,6 @@ cifar10_weights = {
 		'wc4': tf.Variable(tf.random_normal([3, 3, 384, 384])),
 		'wc5': tf.Variable(tf.random_normal([3, 3, 384, 256])),
 		'wd1': tf.Variable(tf.random_normal([4*4*256, 4096])),
-
 		'wd2': tf.Variable(tf.random_normal([4096, 4096])),
 		'out': tf.Variable(tf.random_normal([4096, 10]))
 }
@@ -301,6 +297,7 @@ def batch_next(train_data, train_label, batch_size_1):
 			#**********************************************************************************************************************
 
 			label_temp = figure_2_label(train_label[index[j]])
+
 
 
 			'''
@@ -680,6 +677,9 @@ def working_flow_mnist():
 
 		print('loss is :' + str(loss))
 		print('loss type is :' + str(type(loss)))
+
+		
+		
 		
 		optimizer_1     = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 		correct_predict = tf.equal(tf.argmax(h_fc3 , 1) , tf.argmax(mnist_y , 1))
@@ -769,10 +769,6 @@ def working_flow_cifar10():
 		
 		h_norm4 = norm(bn_conv4)
 		#h_norm4 = h_conv4
-
-
-
-
 		print('\n*******h_conv4 is: ' + str(h_conv4))
 		print('\n*******h_conv4 type is: ' + str(type(h_conv4)))
 
@@ -789,8 +785,6 @@ def working_flow_cifar10():
 		h_pool5 = max_pool_3x3(bn_conv5)
 		h_norm5 = norm(h_pool5)
 		#h_norm5 = h_pool5
-
-
 
 
 		print('\n*******h_conv5 is: ' + str(h_conv5))
@@ -829,8 +823,6 @@ def working_flow_cifar10():
 		h_fc2  = tf.matmul(bn_fc1, cifar10_weights['wd2']) + cifar10_biases['bd2']
 		bn_fc2 = tf.layers.batch_normalization(h_fc2, training=is_training, name='fc2')
 		bn_fc2 = tf.nn.relu(bn_fc2)
-
-
 
 		print('\n*******h_fc2 is: ' + str(h_fc2))
 		print('\n*******h_fc2 type is: ' + str(type(h_fc2)))
@@ -969,7 +961,6 @@ def cnn_train_cifar10():
 						#batch_mnist    = mnist.train.next_batch(batch_size)
 						#batch_1 = load_CIFAR_batch('./../data/cifar-10-batches-py/data_batch_1')
 
-
 						#batch_cifar10  = cifar10.train.next_batch(64)
 						'''
 						#调试新建batch函数的log , 查看生成的batch是否正确
@@ -993,11 +984,6 @@ def cnn_train_cifar10():
 						plt.show()
 						*****************************************************
 						'''
-
-
-
-
-
 
 						#print( 'batch type is: ' + str(type(batch)))
 
@@ -1131,7 +1117,7 @@ def cnn_train_cifar10():
 								else:
 									learning_rate = learning_rate_init / 100000
 
-								if i == 200000:
+								if i == 10000:
 									sess.close()
 									break
 
