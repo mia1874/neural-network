@@ -3,7 +3,7 @@
 '''#------------------------network info---------------------------------#
 20181008
 AlexNet
-
+PS: some hyperparameters need to be updated
 
 Type:            Maps   Size       Kernelsize   Stride  Padding
 
@@ -664,6 +664,12 @@ def working_flow_mnist():
 		#h_fc3 = tf.nn.relu(tf.matmul(h_fc2, W_fc3) + b_fc3)
 		#h_fc3 = tf.nn.softmax(tf.matmul(h_fc2 , weights['out']) + biases['out'])
 		h_fc3 = tf.matmul(h_fc2 , mnist_weights['out']) + mnist_biases['out']
+		
+		
+		#-----------------------------------------add softmax start 
+		h_fc3 = tf.nn.softmax(h_fc3)
+		#-----------------------------------------add softmax end 
+		
 		print('\n*******h_fc3 is: ' + str(h_fc3))
 		print('\n*******h_fc3 type is: ' + str(type(h_fc3)))
 

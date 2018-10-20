@@ -336,6 +336,9 @@ def cnn_train_mnist():
 		indice = range(0, 5000 ,10)
 		sess = tf.InteractiveSession()
 		sess.run(tf.global_variables_initializer())
+		tf.train.start_queue_runners(sess=sess)
+
+
 		
 		print('mnist.test.images length is: ' + str(len(mnist.test.images)))
 		
