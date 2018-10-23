@@ -111,23 +111,24 @@ mnist_biases = {
 
 
 
-
+'''
 # hyperparameter for cifar10 using VGG-16
 cifar10_weights = {
-		'wc1': tf.Variable(tf.truncated_normal([3, 3, 3, 16])),
-		'wc2': tf.Variable(tf.truncated_normal([3, 3, 16, 32])),
-		'wc3': tf.Variable(tf.truncated_normal([3, 3, 32, 64])),
-		'wc4': tf.Variable(tf.truncated_normal([3, 3, 64, 64])),
-		'wc5': tf.Variable(tf.truncated_normal([3, 3, 64, 128])),
-		'wc6': tf.Variable(tf.truncated_normal([3, 3, 128, 128])),
-		'wc7': tf.Variable(tf.truncated_normal([3, 3, 128, 128])),
+		'wc1': tf.Variable(tf.truncated_normal([3, 3, 3, 64])),
+		'wc2': tf.Variable(tf.truncated_normal([3, 3, 64, 64])),
+		'wc3': tf.Variable(tf.truncated_normal([3, 3, 64, 128])),
+		'wc4': tf.Variable(tf.truncated_normal([3, 3, 128, 128])),
+		'wc5': tf.Variable(tf.truncated_normal([3, 3, 128, 256])),
+		'wc6': tf.Variable(tf.truncated_normal([3, 3, 256, 256])),
+		'wc7': tf.Variable(tf.truncated_normal([3, 3, 256, 256])),
 		'wc8': tf.Variable(tf.truncated_normal([3, 3, 128, 128])),
 
-		#'wd1': tf.Variable(tf.truncated_normal([n_in, 256])),
-		# n_in is 1152
-		'wd1': tf.Variable(tf.truncated_normal([256, 256])),
-		'wd2': tf.Variable(tf.truncated_normal([256, 256])),
-		'out': tf.Variable(tf.truncated_normal([256, 10]))
+
+		'wd1': tf.Variable(tf.truncated_normal([256, 512])),
+		'wd2': tf.Variable(tf.truncated_normal([512, 512])),
+		'out': tf.Variable(tf.truncated_normal([512, 10]))
+
+
 }
 cifar10_biases = {
 		'bc1': tf.Variable(tf.truncated_normal([16])),
@@ -139,8 +140,43 @@ cifar10_biases = {
 		'bc7': tf.Variable(tf.truncated_normal([128])),
 		'bc8': tf.Variable(tf.truncated_normal([128])),
 
-		'bd1': tf.Variable(tf.truncated_normal([256])),
-		'bd2': tf.Variable(tf.truncated_normal([256])),
+		'bd1': tf.Variable(tf.truncated_normal([512])),
+		'bd2': tf.Variable(tf.truncated_normal([512])),
+		'out': tf.Variable(tf.truncated_normal([10]))
+}
+
+
+'''
+# hyperparameter for cifar10 using VGG-16
+cifar10_weights = {
+		'wc1': tf.Variable(tf.truncated_normal([3, 3, 3, 16])),
+		'wc2': tf.Variable(tf.truncated_normal([3, 3, 16, 32])),
+		'wc3': tf.Variable(tf.truncated_normal([3, 3, 32, 64])),
+		'wc4': tf.Variable(tf.truncated_normal([3, 3, 64, 64])),
+		'wc5': tf.Variable(tf.truncated_normal([3, 3, 64, 128])),
+		'wc6': tf.Variable(tf.truncated_normal([3, 3, 128, 128])),
+		'wc7': tf.Variable(tf.truncated_normal([3, 3, 128, 128])),
+		'wc8': tf.Variable(tf.truncated_normal([3, 3, 128, 128])),
+
+
+		'wd1': tf.Variable(tf.truncated_normal([2048, 4096])),
+		'wd2': tf.Variable(tf.truncated_normal([4096, 4096])),
+		'out': tf.Variable(tf.truncated_normal([4096, 10]))
+
+
+}
+cifar10_biases = {
+		'bc1': tf.Variable(tf.truncated_normal([16])),
+		'bc2': tf.Variable(tf.truncated_normal([32])),
+		'bc3': tf.Variable(tf.truncated_normal([64])),
+		'bc4': tf.Variable(tf.truncated_normal([64])),
+		'bc5': tf.Variable(tf.truncated_normal([128])),
+		'bc6': tf.Variable(tf.truncated_normal([128])),
+		'bc7': tf.Variable(tf.truncated_normal([128])),
+		'bc8': tf.Variable(tf.truncated_normal([128])),
+
+		'bd1': tf.Variable(tf.truncated_normal([4096])),
+		'bd2': tf.Variable(tf.truncated_normal([4096])),
 		'out': tf.Variable(tf.truncated_normal([10]))
 }
 
@@ -178,12 +214,6 @@ def weight_variable(shape):
 		#initial = tf.truncated_normal(shape , stddev=0.1)
 		initial = tf.truncated_normal(shape , stddev=0.01)
 		return tf.Variable(initial)
-
-'''
-new
-'''
-
-
 
 
 def bias_variable(shape):
@@ -416,13 +446,19 @@ def working_flow_cifar10():
 
 
 		#reshape_norm8 = tf.reshape(h_norm8, [batch_size, -1])
-		reshape_norm8 = tf.reshape(h_norm8, [-1, 256])
+		#reshape_norm8 = tf.reshape(h_norm8, [-1, 256])
+		#error: InvalidArgumentError (see above for traceback): Incompatible shapes: [800] vs. [100]
+		#change 256 to 2048------256 x 8 = 2048
+
+		reshape_norm8 = tf.reshape(h_norm8, [-1, 2048])
 
 		print('reshape_norm8 is: ' + str(reshape_norm8) + '\n')
 
 		n_in = reshape_norm8.get_shape()[-1].value
 
 		print('n_in is: ' + str(n_in) + '\n')
+
+
 
 
 
@@ -449,8 +485,8 @@ def working_flow_cifar10():
 		#h_fc1 = dropout(bn_fc1)
 
 
-		print('\n*******h_fc1 is: ' + str(h_fc1))
-		print('\n*******h_fc1 type is: ' + str(type(h_fc1)))
+		print('\n*******bn_fc1 is: ' + str(bn_fc1))
+		print('\n*******bn_fc1 type is: ' + str(type(bn_fc1)))
 
 
 		#h_fc2 = tf.nn.relu(tf.matmul(h_fc1, cifar10_weights['wd2']) + cifar10_biases['bd2'])
@@ -474,12 +510,12 @@ def working_flow_cifar10():
 		print('\n*******h_fc3 is: ' + str(h_fc3))
 		#print('\n*******cifar10_y is: ' + str(cifar10_y))
 
-		h_fc3 = tf.nn.softmax(h_fc3)
+		#h_fc3 = tf.nn.softmax(h_fc3)
+		#print('\n*******h_fc3 2 is: ' + str(h_fc3))
+
+
+		h_fc3  = tf.reshape(h_fc3,[-1,10])
 		print('\n*******h_fc3 2 is: ' + str(h_fc3))
-
-
-
-
 
 		loss  = loss_cross_entropy( h_fc3 , cifar10_y)
 		#loss  = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = h_fc3 , labels = cifar10_y))
@@ -493,8 +529,8 @@ def working_flow_cifar10():
 		#optimizer_1     = tf.train.RMSPropOptimizer(learning_rate=1e-3).minimize(loss)
 
 
-		print('---------------------------tf.argmax(h_fc3    ,1) shape is:' + str(tf.argmax(h_fc3 , 1).get_shape()))
-		print('---------------------------tf.argmax(cifar10_y,1) shape is:' + str(tf.argmax(cifar10_y , 1).get_shape()))
+		#print('---------------------------tf.argmax(h_fc3    ,1) shape is:' + str(tf.argmax(h_fc3 , 1).get_shape()))
+		#print('---------------------------tf.argmax(cifar10_y,1) shape is:' + str(tf.argmax(cifar10_y , 1).get_shape()))
 
 
 
@@ -518,7 +554,7 @@ def working_flow_cifar10():
 
 
 #---------------- training start -------------#
-def cnn_train_cifar10():
+def vgg_train_cifar10():
 		global learning_rate
 		'''
 		with tf.Session(config=tf.ConfigProto(
@@ -650,12 +686,11 @@ def cnn_train_cifar10():
 						if i%5 == 0:
 								#begin_2 = time.time()
 
+								'''
 								print('cifar10_x is: '     + str(cifar10_x))
 								print('batch_cifar10 is: ' + str(batch_cifar10))
 								'''
-								print('mnist_x is: '     + str(mnist_x))
-								print('batch_mnist is: ' + str(batch_mnist))
-								'''
+
 
 
 								train_accuracy = sess.run(accuracy, feed_dict={cifar10_x: batch_cifar10[0], cifar10_y: batch_cifar10[1], keep_prob: 1.})
@@ -768,6 +803,6 @@ if __name__ == '__main__':
 
 		saver = tf.train.Saver()
 
-		cnn_train_cifar10()
+		vgg_train_cifar10()
 
 		predict_cifar10()
