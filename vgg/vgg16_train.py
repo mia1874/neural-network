@@ -9,30 +9,30 @@ Type:            Maps   Size       Kernelsize   Stride  Padding
 
 input            3      32x32      -            -       -
 
-conv3-16		
-max_pool		
+conv3-16
+max_pool
 
-conv3-32		
-max_pool		
+conv3-32
+max_pool
 
-conv3-64		
-max_pool		
+conv3-64
+max_pool
 
-conv3-128		
-conv3-128		
+conv3-128
+conv3-128
 
-conv3-256		
-conv3-256		
+conv3-256
+conv3-256
 
-reshape			
-fully connected	
-dropout			
+reshape
+fully connected
+dropout
 
-fully connected	
-dropout			
+fully connected
+dropout
 
-fully connected	
-softmax out		
+fully connected
+softmax out
 #---------------------------------------------------------------------#'''
 
 
@@ -62,7 +62,7 @@ import pickle
 import os
 import sys
 import cifar10_load
-
+import cifar10_input
 
 
 #-------------variable init-----------------#
@@ -79,6 +79,10 @@ saver       = []
 optimizer_1 = []
 loss        = []
 predict     = []
+
+data_dir    = './../../data/cifar-10-batches-py'
+
+
 
 
 
@@ -120,14 +124,11 @@ cifar10_weights = {
 		'wc8': tf.Variable(tf.truncated_normal([3, 3, 128, 128])),
 
 
+		'wd1': tf.Variable(tf.truncated_normal([256, 512])),
+		'wd2': tf.Variable(tf.truncated_normal([512, 512])),
+		'out': tf.Variable(tf.truncated_normal([512, 10]))
 
-		#'wd1': tf.Variable(tf.truncated_normal([n_in, 256])),
-		# n_in is 1152
-		
 
-		'wd1': tf.Variable(tf.truncated_normal([1152, 256])),
-		'wd2': tf.Variable(tf.truncated_normal([256, 256])),
-		'out': tf.Variable(tf.truncated_normal([256, 10]))
 }
 cifar10_biases = {
 		'bc1': tf.Variable(tf.truncated_normal([16])),
@@ -138,9 +139,9 @@ cifar10_biases = {
 		'bc6': tf.Variable(tf.truncated_normal([128])),
 		'bc7': tf.Variable(tf.truncated_normal([128])),
 		'bc8': tf.Variable(tf.truncated_normal([128])),
-		
-		'bd1': tf.Variable(tf.truncated_normal([256])),
-		'bd2': tf.Variable(tf.truncated_normal([256])),
+
+		'bd1': tf.Variable(tf.truncated_normal([512])),
+		'bd2': tf.Variable(tf.truncated_normal([512])),
 		'out': tf.Variable(tf.truncated_normal([10]))
 }
 
@@ -166,9 +167,9 @@ cifar10_y    = tf.placeholder("float", shape = [None, 10])
 '''
 
 
-
-cifar10_x    = tf.placeholder(tf.float32, shape = [None, 24 ,24 ,3])
-cifar10_y    = tf.placeholder(tf.float32, shape = [None, 256])
+# placeholder 的设置由数据集决定
+cifar10_x    = tf.placeholder(tf.float32, shape = [None, 3072])
+cifar10_y    = tf.placeholder(tf.float32, shape = [None, 10])
 
 
 
@@ -178,12 +179,6 @@ def weight_variable(shape):
 		#initial = tf.truncated_normal(shape , stddev=0.1)
 		initial = tf.truncated_normal(shape , stddev=0.01)
 		return tf.Variable(initial)
-
-'''
-new 
-'''
-
-
 
 
 def bias_variable(shape):
@@ -217,11 +212,11 @@ def softmax(x, W, b):
 def loss_cross_entropy( x,  y):
 		#===============================change loss function
 		return (tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = x , labels = y)))
-		
-		
-		
+
+
+
 		#return (tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = x , labels = y)))
-		#return (-tf.reduce_mean(y * tf.log(tf.clip_by_value(x, 1e-10, 1.0))) 
+		#return (-tf.reduce_mean(y * tf.log(tf.clip_by_value(x, 1e-10, 1.0)))
 
 def optimizer(learning_rate, cross_entropy):
 		return(tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy))
@@ -243,7 +238,7 @@ def working_flow_cifar10():
 		global n_in
 
 		#layer 0
-		x_image = tf.reshape(cifar10_x, [-1,24,24,3])
+		x_image = tf.reshape(cifar10_x, [-1,32,32,3])
 
 
 		#============layer 1=================#
@@ -256,7 +251,7 @@ def working_flow_cifar10():
 
 		print('\n*******h_conv1 is: ' + str(h_conv1))
 		print('\n*******h_conv1 type is: ' + str(type(h_conv1)))
-		#=================================pooling 1 
+		#=================================pooling 1
 		h_pool1 = max_pool_3x3(bn_conv1)
 
 
@@ -280,7 +275,7 @@ def working_flow_cifar10():
 
 		print('\n*******h_conv2 is: ' + str(h_conv2))
 		print('\n*******h_conv2 type is: ' + str(type(h_conv2)))
-		#=================================pooling 2 
+		#=================================pooling 2
 		h_pool2 = max_pool_3x3(bn_conv2)
 
 		print('\n*******h_pool2 is: ' + str(h_pool2))
@@ -311,11 +306,11 @@ def working_flow_cifar10():
 		bn_conv4 = tf.nn.relu(bn_conv4)
 
 
-		#=================================pooling 3 
+		#=================================pooling 3
 		h_pool3 = max_pool_3x3(bn_conv4)
 
-		
-		
+
+
 		h_norm4 = norm(h_pool3)
 		#h_norm4 = h_conv4
 		print('\n*******h_conv4 is: ' + str(h_conv4))
@@ -341,7 +336,7 @@ def working_flow_cifar10():
 		#h_norm5 = norm(h_pool5)
 		h_norm5 = norm(bn_conv5)
 
-		
+
 		#h_norm5 = h_pool5
 
 
@@ -363,8 +358,8 @@ def working_flow_cifar10():
 		#h_pool6 = max_pool_3x3(bn_conv6)
 		#h_norm6 = norm(h_pool6)
 		h_norm6 = norm(bn_conv6)
-		
-		
+
+
 		#h_norm5 = h_pool5
 
 
@@ -374,8 +369,8 @@ def working_flow_cifar10():
 		print('\n*******h_norm6 is: ' + str(h_norm6))
 		print('\n*******h_norm6 type is: ' + str(type(h_norm6)))
 
-	
-		
+
+
 		#============layer 5=================#
 		#============conv + conv ============#
 		h_conv7  = conv2d_1(h_norm6, cifar10_weights['wc7']) + cifar10_biases['bc7']
@@ -385,7 +380,7 @@ def working_flow_cifar10():
 		#h_pool7 = max_pool_3x3(bn_conv7)
 		#h_norm7 = norm(h_pool7)
 		h_norm7 = norm(bn_conv7)
-		
+
 		#h_norm5 = h_pool5
 
 
@@ -416,14 +411,16 @@ def working_flow_cifar10():
 
 
 		#reshape_norm8 = tf.reshape(h_norm8, [batch_size, -1])
-		reshape_norm8 = tf.reshape(h_norm8, [256, -1])
+		reshape_norm8 = tf.reshape(h_norm8, [-1, 256])
+
+		print('reshape_norm8 is: ' + str(reshape_norm8) + '\n')
 
 		n_in = reshape_norm8.get_shape()[-1].value
 
 		print('n_in is: ' + str(n_in) + '\n')
-		
 
-	
+
+
 		#conv8 and fully_connect
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------
 		'''
@@ -440,15 +437,15 @@ def working_flow_cifar10():
 		'''
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 		h_fc1  = tf.matmul(reshape_norm8 , cifar10_weights['wd1']) + cifar10_biases['bd1']
+		#h_fc1  = tf.matmul(h_norm8 , cifar10_weights['wd1']) + cifar10_biases['bd1']
 		bn_fc1 = tf.layers.batch_normalization(h_fc1, training=is_training, name='fc1')
 		bn_fc1 = tf.nn.relu(bn_fc1)
 		#h_fc1 = dropout(bn_fc1)
 
 
-		print('\n*******h_fc1 is: ' + str(h_fc1))
-		print('\n*******h_fc1 type is: ' + str(type(h_fc1)))
+		print('\n*******bn_fc1 is: ' + str(bn_fc1))
+		print('\n*******bn_fc1 type is: ' + str(type(bn_fc1)))
 
 
 		#h_fc2 = tf.nn.relu(tf.matmul(h_fc1, cifar10_weights['wd2']) + cifar10_biases['bd2'])
@@ -459,12 +456,25 @@ def working_flow_cifar10():
 		bn_fc2 = tf.nn.relu(bn_fc2)
 
 		print('\n*******h_fc2 is: ' + str(h_fc2))
-		print('\n*******h_fc2 type is: ' + str(type(h_fc2)))
+		#print('\n*******h_fc2 type is: ' + str(type(h_fc2)))
+
+
+		print('\n*******bn_fc2 is: ' + str(bn_fc2))
+		#print('\n*******bn_fc2 type is: ' + str(type(bn_fc2)))
+
+
 
 
 		h_fc3 = tf.matmul(bn_fc2 , cifar10_weights['out']) + cifar10_biases['out']
 		print('\n*******h_fc3 is: ' + str(h_fc3))
+		#print('\n*******cifar10_y is: ' + str(cifar10_y))
 
+		#h_fc3 = tf.nn.softmax(h_fc3)
+		#print('\n*******h_fc3 2 is: ' + str(h_fc3))
+
+
+		h_fc3  = tf.reshape(h_fc3,[-1,10])
+		print('\n*******h_fc3 2 is: ' + str(h_fc3))
 
 		loss  = loss_cross_entropy( h_fc3 , cifar10_y)
 		#loss  = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits = h_fc3 , labels = cifar10_y))
@@ -474,11 +484,18 @@ def working_flow_cifar10():
 		#优化器---->各种对于梯度下降算法的优化。
 		#似乎没什么区别
 		optimizer_1     = tf.train.AdamOptimizer(learning_rate).minimize(loss)
-		
+
 		#optimizer_1     = tf.train.RMSPropOptimizer(learning_rate=1e-3).minimize(loss)
-		
-		
+
+
+		#print('---------------------------tf.argmax(h_fc3    ,1) shape is:' + str(tf.argmax(h_fc3 , 1).get_shape()))
+		#print('---------------------------tf.argmax(cifar10_y,1) shape is:' + str(tf.argmax(cifar10_y , 1).get_shape()))
+
+
+
 		correct_predict = tf.equal(tf.argmax(h_fc3 , 1) , tf.argmax(cifar10_y , 1))
+
+
 		#accuracy        = tf.reduce_mean(tf.cast(correct_predict, "float"))
 		accuracy        = tf.reduce_mean(tf.cast(correct_predict, tf.float32))
 
@@ -496,7 +513,7 @@ def working_flow_cifar10():
 
 
 #---------------- training start -------------#
-def cnn_train_cifar10():
+def vgg_train_cifar10():
 		global learning_rate
 		'''
 		with tf.Session(config=tf.ConfigProto(
@@ -504,7 +521,7 @@ def cnn_train_cifar10():
 						inter_op_parallelism_threads=1,
 						intra_op_parallelism_threads=1,
 						)) as sess:
-		'''	
+		'''
 		with tf.Session() as sess:
 				train_acc = []
 				sess = tf.InteractiveSession()
@@ -530,7 +547,14 @@ def cnn_train_cifar10():
 						#batch_1[0][0] 和 batch[0] 都是图片
 						'''
 						batch_cifar10  = cifar10_load.batch_next(cifar10[0], cifar10[1] , batch_size)
-						
+
+
+						'''
+						============================old data input function:
+						train_images, train_labels = cifar10_input.distorted_inputs(batch_size= batch_size, data_dir= data_dir)
+						batch_images, batch_labels = sess.run([train_images, train_labels])
+						'''
+
 						#图片及label生成测试
 						'''
 						*****************************************************
@@ -580,17 +604,17 @@ def cnn_train_cifar10():
 						print('batch_mnist is:' + str(batch_mnist))
 
 						#plt.imshow(np.reshape((batch_1[0][i]/256), [32 , 32 , 3]) )
-						
 
-						
+
+
 						#图片显示调试
 						plt.title('Actual: ' + label_2_figure(str(batch[1][0])) + '     Predict: ' + label_2_figure(str(batch_cifar10[1][i])) + '\n')
 
 						plt.imshow(np.reshape((batch_cifar10[0][i]/256) , [32 , 32 , 3]))
 						plt.show()
-						
 
-						
+
+
 						#调试新建batch函数的log , 查看生成的batch是否正确
 
 						print('batch_mnist[0]   is: ' + str(batch_mnist[0]))
@@ -620,22 +644,34 @@ def cnn_train_cifar10():
 
 						if i%5 == 0:
 								#begin_2 = time.time()
-								
+
+								'''
 								print('cifar10_x is: '     + str(cifar10_x))
 								print('batch_cifar10 is: ' + str(batch_cifar10))
 								'''
-								print('mnist_x is: '     + str(mnist_x))
-								print('batch_mnist is: ' + str(batch_mnist))
-								'''
+
 
 								train_accuracy = sess.run(accuracy, feed_dict={cifar10_x: batch_cifar10[0], cifar10_y: batch_cifar10[1], keep_prob: 1.})
+
+								'''
+								============================old data input function:
+								train_accuracy = sess.run(accuracy, feed_dict={cifar10_x: batch_images, cifar10_y: batch_labels, keep_prob: 1.})
+								'''
 								#train_accuracy = sess.run(accuracy, feed_dict={cifar10_x: batch_1[0], cifar10_y: batch_1[1], keep_prob: 1.})
 								#print('train_accuracy is: '      + str(train_accuracy))
 								#print('train_accuracy type is: ' + str(type(train_accuracy)))
 
-
 								loss_1         = sess.run(loss,     feed_dict={cifar10_x: batch_cifar10[0], cifar10_y: batch_cifar10[1], keep_prob: 1.})
 								prediction     = sess.run(predict,  feed_dict={cifar10_x: batch_cifar10[0], cifar10_y: batch_cifar10[1], keep_prob: 1.})
+
+
+								'''
+								============================old data input function:
+								loss_1         = sess.run(loss,     feed_dict={cifar10_x: batch_images, cifar10_y: batch_labels, keep_prob: 1.})
+								prediction     = sess.run(predict,  feed_dict={cifar10_x: batch_images, cifar10_y: batch_labels, keep_prob: 1.})
+								'''
+
+
 								#print('=-=================== loss :' + str(loss_1) + '\n')
 
 
@@ -676,8 +712,11 @@ def cnn_train_cifar10():
 									sess.close()
 									break
 
-
 						optimizer_1.run(feed_dict = {cifar10_x: batch_cifar10[0] , cifar10_y: batch_cifar10[1] , keep_prob:1.})
+						'''
+						============================net data input function:
+						optimizer_1.run(feed_dict = {cifar10_x: batch_images , cifar10_y: batch_labels , keep_prob:1.})
+						'''
 
 						#end_1 = time.time()
 						#print('Using time 1 :' + str(end_1 - begin_1) + '\n')
@@ -693,7 +732,7 @@ def cnn_train_cifar10():
 #----------------- predict start -------------#
 def predict_cifar10():
 		batch_size = 1000
-		sess = tf.InteractiveSession()
+		sess  = tf.InteractiveSession()
 		sess.run(tf.global_variables_initializer())
 		saver = tf.train.Saver(tf.global_variables())
 		saver.restore(sess, './../model/model_alexnet_cifar10.ckpt')
@@ -702,14 +741,14 @@ def predict_cifar10():
 		#mnist 的test batch
 		test_batch    = batch_next(cifar10_test[0], cifar10_test[1] , batch_size)
 
-		
+
 		loss_3        = sess.run(loss,     feed_dict={cifar10_x: test_batch[0], cifar10_y: test_batch[1], keep_prob: 1.})
 		test_accuracy = sess.run(accuracy, feed_dict={cifar10_x: test_batch[0], cifar10_y: test_batch[1], keep_prob: 1.})
-		
+
 
 		#for i in range(5):
 		print ("Iter " + str(batch_size) + ", Minibatch Loss = " + str(loss_3) + ", Testing Accuracy = " + str(test_accuracy) )
-		
+
 		#print( "test accuracy %g" % accuracy.eval(feed_dict={mnist_x:mnist.test.images, mnist_y:mnist.test.labels, keep_prob:1.0}))
 
 
@@ -722,9 +761,6 @@ if __name__ == '__main__':
 
 		saver = tf.train.Saver()
 
-		cnn_train_cifar10()
-		
+		vgg_train_cifar10()
+
 		predict_cifar10()
-
-
-
