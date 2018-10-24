@@ -56,7 +56,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
-import cv2
+#import cv2
 import time
 import pickle
 import os
@@ -721,7 +721,7 @@ def vgg_train_cifar10():
 								#print ("step %d, training accuracy %g" % (i, train_accuracy))
 
 								# save model for reusing
-								saver.save(sess, './../model/model_alexnet_cifar10.ckpt')
+								saver.save(sess, './../../model/model_vgg16_cifar10.ckpt')
 								#end_2 = time.time()
 								#print('Using time 2 :' + str(end_2 - begin_2) + '\n')
 
@@ -741,16 +741,16 @@ def vgg_train_cifar10():
 									learning_rate = learning_rate_init
 								elif i>500  and i<1000:
 									learning_rate = learning_rate_init / 10
-								elif i>1000 and i<2000:
+								elif i>1000 and i<5000:
 									learning_rate = learning_rate_init / 100
-								elif i>2000 and i<5000:
-									learning_rate = learning_rate_init / 1000
 								elif i>5000 and i<10000:
+									learning_rate = learning_rate_init / 1000
+								elif i>10000 and i<50000:
 									learning_rate = learning_rate_init / 10000
 								else:
 									learning_rate = learning_rate_init / 100000
 
-								if i == 10000:
+								if i == 20000:
 									sess.close()
 									break
 
@@ -777,11 +777,11 @@ def predict_cifar10():
 		sess  = tf.InteractiveSession()
 		sess.run(tf.global_variables_initializer())
 		saver = tf.train.Saver(tf.global_variables())
-		saver.restore(sess, './../model/model_alexnet_cifar10.ckpt')
+		saver.restore(sess, './../../model/model_vgg16_cifar10.ckpt')
 
 
 		#mnist 的test batch
-		test_batch    = batch_next(cifar10_test[0], cifar10_test[1] , batch_size)
+		test_batch    = cifar10_load.batch_next(cifar10_test[0], cifar10_test[1] , batch_size)
 
 
 		loss_3        = sess.run(loss,     feed_dict={cifar10_x: test_batch[0], cifar10_y: test_batch[1], keep_prob: 1.})
