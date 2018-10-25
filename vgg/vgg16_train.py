@@ -48,6 +48,14 @@ file_info = (
 				1. VGG working on MNIST and CIFAR10 data set
 				2. Include 4 files
 				3. Bug fix
+		
+		v1.1.0.1025_alpha Update
+				1. Bug fix 
+				2. Hyperparameter adjust
+				3. Dropout
+						without dropout: 20000 ---> test accuracy0.56    loss4.7
+				
+		
 		''')
 
 
@@ -474,7 +482,6 @@ def working_flow_cifar10():
 
 
 		#h_fc1 = tf.nn.relu(tf.matmul(h_conv6, cifar10_weights['wd1']) + cifar10_biases['bd1'])
-		#======================= remove dropout begin
 		'''
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -482,7 +489,7 @@ def working_flow_cifar10():
 		#h_fc1  = tf.matmul(h_norm8 , cifar10_weights['wd1']) + cifar10_biases['bd1']
 		bn_fc1 = tf.layers.batch_normalization(h_fc1, training=is_training, name='fc1')
 		bn_fc1 = tf.nn.relu(bn_fc1)
-		#h_fc1 = dropout(bn_fc1)
+		bn_fc1 = dropout(bn_fc1)
 
 
 		print('\n*******bn_fc1 is: ' + str(bn_fc1))
@@ -492,18 +499,19 @@ def working_flow_cifar10():
 		#h_fc2 = tf.nn.relu(tf.matmul(h_fc1, cifar10_weights['wd2']) + cifar10_biases['bd2'])
 		#======================= remove dropout begin
 		#h_fc2 = dropout(h_fc2)
+		#======================= remove dropout end
 		h_fc2  = tf.matmul(bn_fc1, cifar10_weights['wd2']) + cifar10_biases['bd2']
 		bn_fc2 = tf.layers.batch_normalization(h_fc2, training=is_training, name='fc2')
 		bn_fc2 = tf.nn.relu(bn_fc2)
-
+		bn_fc2 = dropout(bn_fc2)
+		
+		
 		print('\n*******h_fc2 is: ' + str(h_fc2))
 		#print('\n*******h_fc2 type is: ' + str(type(h_fc2)))
 
 
 		print('\n*******bn_fc2 is: ' + str(bn_fc2))
 		#print('\n*******bn_fc2 type is: ' + str(type(bn_fc2)))
-
-
 
 
 		h_fc3 = tf.matmul(bn_fc2 , cifar10_weights['out']) + cifar10_biases['out']
@@ -750,7 +758,7 @@ def vgg_train_cifar10():
 								else:
 									learning_rate = learning_rate_init / 100000
 
-								if i == 20000:
+								if i == 30000:
 									sess.close()
 									break
 
