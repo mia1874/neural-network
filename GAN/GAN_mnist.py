@@ -166,7 +166,7 @@ def plot(samples):
 	return fig
 
 if not os.path.exists('out/'):
-    os.makedirs('out/')
+	os.makedirs('out/')
 
 sess.run(tf.global_variables_initializer())
 
